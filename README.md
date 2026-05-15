@@ -11,12 +11,10 @@
 
 ## 📌 프로젝트 소개
 
-안녕하세요! 이 프로젝트는 취업용 ML/DL 포트폴리오로 만들었습니다.
-
-요즘 청소년들이 소셜미디어를 얼마나 많이 쓰는지, 수면은 얼마나 자는지... 이런 생활 패턴이 정신건강에 어떤 영향을 미치는지 데이터로 분석해봤어요. 딱딱한 논문처럼 결과만 보여주는 게 아니라, 실제로 "내가 입력하면 결과가 나오는" 서비스를 만들고 싶었습니다.
+요즘 SNS중독이 심하잖아요~? 저 또한 도파민중독 쇼츠중독 ..ing 앓고 있지만 kaggle에 데이터셋에 '소셜 미디어가 청소년 정신 건강에 미치는 영향' 이 있어서 흥미를 느끼게 되어 프로젝트를 진행해보게 되었습니다! 이런 생활 패턴이 정신건강에 어떤 영향을 미치는지 데이터로 분석해보았습니다. 딱딱한 논문처럼 결과만 보여주는 게 아니라, 실제로 내가 입력하면 결과가 어떻게 나오는가.. RAG을 통해 LLM으로 질문도 해보고 하면 좋을 것 같아서 진행해보았습니다.
 
 **왜 이 주제를 선택했나요?**  
-AICE Associate 자격을 취득하면서 배운 ML/DL 기술을 사회적으로 의미 있는 주제에 적용해보고 싶었습니다. 청소년 정신건강은 전 세계적으로 중요한 이슈이고, 데이터 기반 인사이트가 실제 도움이 될 수 있다고 생각했어요.
+AICE Associate 자격을 취득하면서 배운 ML/DL 기술을 사회적으로 의미 있는 주제에 적용해보고 싶었습니다. SNS중독은 전 세계적으로 중요한 이슈이고, 데이터 기반 인사이트가 좋은 거름이 되지 않을까 싶었습니다.
 
 ---
 
@@ -24,8 +22,8 @@ AICE Associate 자격을 취득하면서 배운 ML/DL 기술을 사회적으로 
 
 | 기능 | 설명 |
 |------|------|
-| 🔍 **위험도 진단** | 나이, 수면, 운동, 소셜미디어 시간 등을 입력하면 Low/Medium/High 위험도 예측 |
-| 📊 **데이터 인사이트** | 원본 데이터셋 분포, 모델 성능 비교, 특성 중요도 시각화 |
+| 🔍 **우울증 위험도 진단** | 소셜미디어 습관·수면·운동·불안 수준 등 12개 항목 입력 → **정상 / 우울증 위험** 이진 예측 |
+| 📊 **데이터 인사이트** | 원본 데이터셋 분포, 클래스 불균형 시각화, 모델 성능 비교(AUC-ROC), 특성 중요도 |
 | 💬 **AI 상담 챗봇** | FAISS 벡터 검색 + LLM으로 청소년 정신건강 관련 Q&A |
 
 ---
@@ -72,8 +70,9 @@ poetry shell
 
 ```bash
 # Kaggle CLI 필요 (pip install kaggle)
-kaggle datasets download -d algozee/teenager-menthal-healy
-unzip teenager-menthal-healy.zip -d data/raw/
+kaggle datasets download -d new-owner/teen-mental-health-dataset
+unzip teen-mental-health-dataset.zip -d data/raw/
+# 또는 Kaggle 웹에서 직접 Teen_Mental_Health_Dataset.csv 를 data/raw/ 에 저장
 ```
 
 ### 4. 환경변수 설정 (선택사항)
@@ -146,21 +145,25 @@ teen-mind-ai/
 
 ## 📊 데이터셋
 
-- **출처**: [Kaggle - Social Media Impact on Teen Mental Health](https://www.kaggle.com/datasets/algozee/teenager-menthal-healy)
+- **출처**: [Kaggle - Teen Mental Health Dataset](https://www.kaggle.com/)
 - **라이선스**: Apache 2.0
-- **크기**: 약 700+ 샘플, 13개 컬럼
-- **타겟**: `mental_health_risk` (Low / Medium / High)
+- **크기**: **1,200 샘플**, 13개 컬럼 (수치형 9개 + 범주형 3개 + 타겟 1개)
+- **타겟**: `depression_label` (0 = 정상 / 1 = 우울증 위험)
+- **클래스 비율**: 정상 1169개(97.4%) vs 우울증 위험 31개(2.6%) — **극심한 불균형**
 
 주요 피처:
 
-| 피처 | 설명 |
-|------|------|
-| `social_media_hours` | 하루 소셜미디어 사용 시간 |
-| `sleep_hours` | 하루 평균 수면 시간 |
-| `physical_activity_hours` | 주간 운동 시간 |
-| `depression_score` | 우울감 자가 평가 (1-10) |
-| `anxiety_score` | 불안감 자가 평가 (1-10) |
-| `family_support_score` | 가족 지지도 (1-10) |
+| 피처 | 타입 | 설명 |
+|------|------|------|
+| `daily_social_media_hours` | 수치형 | 하루 소셜미디어 사용 시간 |
+| `platform_usage` | 범주형 | 주 사용 플랫폼 (Instagram/TikTok/Both) |
+| `sleep_hours` | 수치형 | 하루 평균 수면 시간 |
+| `screen_time_before_sleep` | 수치형 | 취침 전 화면 사용 시간 |
+| `physical_activity` | 수치형 | 주간 운동 시간 |
+| `social_interaction_level` | 범주형 | 대인 교류 수준 (low/medium/high) |
+| `stress_level` | 수치형 | 스트레스 수준 (1-10) |
+| `anxiety_level` | 수치형 | 불안 수준 (1-10) |
+| `addiction_level` | 수치형 | SNS 중독 수준 (1-10) |
 
 ---
 
@@ -168,12 +171,15 @@ teen-mind-ai/
 
 학습 후 `notebooks/03_ml_modeling.ipynb`에서 상세 결과를 확인할 수 있습니다.
 
-| 모델 | Accuracy | F1 (weighted) |
-|------|----------|---------------|
-| Logistic Regression | - | - |
-| Random Forest | - | - |
-| XGBoost | - | - |
-| Neural Network | - | - |
+> 데이터셋의 97.4% vs 2.6% 극심한 불균형으로 인해 **Accuracy는 의미 없음** → AUC-ROC와 F1(binary)으로 평가  
+> 전 모델에 `class_weight='balanced'` 적용 (XGBoost: `scale_pos_weight=37`)
+
+| 모델 | Accuracy | F1 (binary) | AUC-ROC |
+|------|----------|-------------|----------|
+| Logistic Regression | - | - | - |
+| Random Forest | - | - | - |
+| XGBoost | - | - | - |
+| Neural Network (PyTorch) | - | - | - |
 
 *직접 학습 후 결과를 채워보세요!*
 
@@ -195,7 +201,7 @@ pytest tests/ -v
 
 ## 📝 License
 
-Apache 2.0 — 데이터셋 라이선스를 따릅니다.
+Apache 2.0 — 데이터셋 라이센스를 따릅니다.
 
 ---
 
