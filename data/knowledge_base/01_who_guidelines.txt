@@ -1,0 +1,31 @@
+WHO Guidelines on Digital Screen Time and Adolescent Mental Health
+Source: World Health Organization, 2019-2023
+
+SECTION 1: RECOMMENDED SCREEN TIME LIMITS
+The World Health Organization recommends that children and adolescents aged 5-17 should limit sedentary screen time to a maximum of 2 hours per day for recreational purposes. This includes social media use, video streaming, and gaming.
+
+Key findings from WHO studies:
+- Adolescents spending more than 3 hours daily on social media have a 2.1x higher risk of poor mental health outcomes
+- Excessive screen time is associated with sleep disorders, anxiety, and depression
+- Protective factors include physical activity, face-to-face social interactions, and adequate sleep
+
+SECTION 2: SOCIAL MEDIA IMPACT
+Social media platforms are designed to maximize engagement through dopamine feedback loops. For developing adolescent brains, this creates particular vulnerability:
+
+1. Comparison Culture: Constant exposure to curated highlight reels of peers creates unrealistic expectations and social comparison anxiety
+2. Cyberbullying Risk: 37% of adolescents report experiencing cyberbullying, with strong links to depression and suicidal ideation
+3. Sleep Disruption: Blue light exposure and notification alerts disrupt circadian rhythms and reduce REM sleep quality
+4. Fear of Missing Out (FOMO): Chronic anxiety from perceived social exclusion
+
+SECTION 3: PROTECTIVE DIGITAL BEHAVIORS
+Recommended healthy digital habits for adolescents:
+- Use social media for less than 90 minutes per day
+- Avoid screen use 1 hour before bedtime
+- Disable push notifications
+- Use grayscale screen mode to reduce addictive engagement
+- Maintain at least one screen-free day per week
+
+Risk classification thresholds based on WHO guidance:
+- LOW RISK: Under 2 hours/day screen time, adequate sleep, regular exercise
+- MEDIUM RISK: 2-4 hours/day, occasional sleep disruption, some anxiety symptoms
+- HIGH RISK: Over 4 hours/day, chronic sleep deprivation, significant depression/anxiety symptoms

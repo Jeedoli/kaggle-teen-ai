@@ -1,0 +1,52 @@
+Social Media Research: Impact on Teen Mental Health
+Source: Journal of Adolescent Health, Twenge et al. (2018-2023), Haidt et al.
+
+SECTION 1: KEY RESEARCH FINDINGS
+Landmark studies on social media and adolescent mental health:
+
+Twenge et al. (2018) - iGen Study:
+- Analyzed data from 500,000+ US teenagers over 40 years
+- Teen depression increased sharply after 2012 (smartphone adoption)
+- Girls particularly vulnerable: 50% increase in depression rates 2012-2017
+- Social media use correlated more strongly with unhappiness than almost any other activity
+
+Haidt & Rausch (2022) - Social Media and Mental Health:
+- Analyzed 17 systematic reviews and meta-analyses
+- Strong correlational evidence for harm, particularly in girls
+- Mechanisms: social comparison, cyberbullying, sleep disruption, displacement of in-person interaction
+
+Braghieri et al. (2022) - Facebook and Mental Health:
+- Quasi-experimental study using staggered Facebook rollout on US campuses
+- Facebook introduction increased depression and anxiety diagnoses by 7-9%
+- First causal evidence linking social media to mental health decline
+
+SECTION 2: MECHANISMS OF HARM
+
+Upward Social Comparison:
+- Social media creates a "highlight reel" environment
+- Adolescents compare their behind-the-scenes to others' best moments
+- Leads to feelings of inadequacy, low self-worth, and FOMO
+- Girls experience stronger effects due to appearance-focused content
+
+Displacement Effect:
+- Each hour on social media displaces in-person social time
+- In-person interaction is strongly protective for mental health
+- Adolescents who spend 5+ hours on devices have 2x more depression symptoms
+
+Attention Economy Effects:
+- Platforms optimize for engagement through variable reward schedules
+- Creates compulsive checking behavior similar to gambling addiction
+- Average teen checks phone 150+ times per day
+
+SECTION 3: PROTECTIVE USE OF SOCIAL MEDIA
+Not all social media use is harmful. Research identifies protective factors:
+- Active participation (creating, messaging) vs passive consumption (scrolling)
+- Close-friend communication vs unknown influencer following
+- Time-limited purposeful use vs open-ended browsing
+- Content that builds skills or community vs content promoting comparison
+
+SECTION 4: RISK FACTORS BY USAGE PATTERN
+Research-based risk classification:
+- LOW RISK: Under 1 hour/day, primarily messaging close friends, no nighttime use
+- MEDIUM RISK: 1-3 hours/day, mixed active/passive use, occasional nighttime use
+- HIGH RISK: 3+ hours/day, predominantly passive consumption, regular bedtime use, cyberbullying exposure
