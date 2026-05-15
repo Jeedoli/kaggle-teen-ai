@@ -43,10 +43,11 @@ class MLClassifier:
         self._build_models()
 
     def _build_models(self) -> None:
-        """모델 딕셔너리 초기화. 여기에 모델을 추가하거나 교체할 수 있습니다."""
+        """모델 딕셔너리 초기화. class_weight='balanced'로 클래스 불균형(1169:31) 대응."""
         self.models = {
             "Logistic Regression (Baseline)": LogisticRegression(
                 max_iter=1000,
+                class_weight="balanced",  # 불균형 대응
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
             ),
@@ -54,6 +55,7 @@ class MLClassifier:
                 n_estimators=200,
                 max_depth=None,
                 min_samples_split=5,
+                class_weight="balanced",  # 불균형 대응
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
             ),
@@ -63,7 +65,8 @@ class MLClassifier:
                 learning_rate=0.1,
                 subsample=0.8,
                 colsample_bytree=0.8,
-                eval_metric="mlogloss",
+                scale_pos_weight=37,  # 1169/31 ≈ 37 (양성 클래스 가중 증가)
+                eval_metric="logloss",
                 random_state=self.random_state,
                 n_jobs=self.n_jobs,
                 verbosity=0,
@@ -96,14 +99,14 @@ class MLClassifier:
 
             # 교차검증
             cv_scores = cross_val_score(
-                model, X_train, y_train, cv=skf, scoring="f1_weighted", n_jobs=self.n_jobs
+                model, X_train, y_train, cv=skf, scoring="f1", n_jobs=self.n_jobs
             )
             self.results[name] = {
                 "model": model,
                 "cv_f1_mean": cv_scores.mean(),
                 "cv_f1_std": cv_scores.std(),
             }
-            print(f"  CV F1 (weighted): {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
+            print(f"  CV F1 (binary): {cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
 
         # 가장 높은 CV F1 점수 모델을 베스트로 선택
         self.best_model_name = max(
@@ -128,29 +131,33 @@ class MLClassifier:
             y_pred = model.predict(X_test)
 
             acc = accuracy_score(y_test, y_pred)
-            f1 = f1_score(y_test, y_pred, average="weighted")
+            f1 = f1_score(y_test, y_pred, average="binary")
+            precision = __import__('sklearn.metrics', fromlist=['precision_score']).precision_score(y_test, y_pred, zero_division=0)
+            recall = __import__('sklearn.metrics', fromlist=['recall_score']).recall_score(y_test, y_pred, zero_division=0)
 
-            # AUC (다중 클래스 지원)
+            # AUC (이진 분류)
             try:
-                y_prob = model.predict_proba(X_test)
-                auc = roc_auc_score(y_test, y_prob, multi_class="ovr", average="weighted")
+                y_prob = model.predict_proba(X_test)[:, 1]
+                auc = roc_auc_score(y_test, y_prob)
             except Exception:
                 auc = float("nan")
 
             rows.append({
                 "Model": name,
                 "Accuracy": round(acc, 4),
-                "F1 (weighted)": round(f1, 4),
-                "AUC (OvR)": round(auc, 4),
+                "F1 (binary)": round(f1, 4),
+                "Precision": round(precision, 4),
+                "Recall": round(recall, 4),
+                "AUC-ROC": round(auc, 4),
                 "CV F1 Mean": round(info["cv_f1_mean"], 4),
                 "CV F1 Std": round(info["cv_f1_std"], 4),
             })
 
             marker = " ← BEST" if name == self.best_model_name else ""
             print(f"\n{name}{marker}")
-            print(f"  Accuracy: {acc:.4f} | F1: {f1:.4f} | AUC: {auc:.4f}")
+            print(f"  Accuracy: {acc:.4f} | F1: {f1:.4f} | Precision: {precision:.4f} | Recall: {recall:.4f} | AUC: {auc:.4f}")
 
-        results_df = pd.DataFrame(rows).sort_values("F1 (weighted)", ascending=False)
+        results_df = pd.DataFrame(rows).sort_values("AUC-ROC", ascending=False)
         return results_df
 
     def get_best_model(self) -> Any:

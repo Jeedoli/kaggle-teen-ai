@@ -71,9 +71,9 @@ def render():
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("총 샘플 수", f"{len(df):,}개")
     col2.metric("피처 수", f"{df.shape[1] - 1}개")
-    target_col = "mental_health_risk"
+    target_col = "depression_label"
     if target_col in df.columns:
-        col3.metric("클래스 수", "3개 (Low/Medium/High)")
+        col3.metric("클래스 수", "2개 (정상/우울증 위험)")
         col4.metric("결측치", f"{df.isnull().sum().sum()}개")
 
     # ── 탭으로 구분
@@ -88,7 +88,7 @@ def render():
                 fig = plot_class_distribution(df[target_col])
                 st.plotly_chart(fig, use_container_width=True)
         with col_b:
-            if "social_media_hours" in df.columns and target_col in df.columns:
+            if "daily_social_media_hours" in df.columns and target_col in df.columns:
                 fig2 = plot_social_media_vs_mental_health(df)
                 st.plotly_chart(fig2, use_container_width=True)
 

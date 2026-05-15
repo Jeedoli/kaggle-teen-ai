@@ -19,22 +19,27 @@ from teen_mind.data.loader import COLUMN_NAMES, TARGET_COLUMN, NUMERIC_COLUMNS, 
 
 
 def _make_sample_df(n: int = 100) -> pd.DataFrame:
-    """테스트용 더미 데이터프레임 생성."""
+    """테스트용 더미 데이터프레임 생성 (실제 데이터셋 구조 반영)."""
     rng = np.random.default_rng(42)
+    # 극심한 불균형 (97%:3%) 반영: n=100이면 0이 97개, 1이 3개
+    n_pos = max(int(n * 0.03), 1)
+    n_neg = n - n_pos
+    labels = np.array([0] * n_neg + [1] * n_pos)
+    rng.shuffle(labels)
     data = {
         "age": rng.integers(13, 20, n),
-        "gender": rng.choice(["Male", "Female", "Other"], n),
-        "social_media_hours": rng.uniform(0, 12, n),
+        "gender": rng.choice(["male", "female"], n),
+        "daily_social_media_hours": rng.uniform(0, 12, n),
+        "platform_usage": rng.choice(["Instagram", "TikTok", "Both"], n),
         "sleep_hours": rng.uniform(4, 11, n),
-        "physical_activity_hours": rng.uniform(0, 15, n),
-        "depression_score": rng.integers(1, 11, n),
-        "anxiety_score": rng.integers(1, 11, n),
+        "screen_time_before_sleep": rng.uniform(0, 5, n),
+        "academic_performance": rng.uniform(1, 10, n),
+        "physical_activity": rng.uniform(0, 15, n),
+        "social_interaction_level": rng.choice(["low", "medium", "high"], n),
         "stress_level": rng.integers(1, 11, n),
-        "self_esteem_score": rng.integers(1, 11, n),
-        "online_support_access": rng.integers(0, 2, n),
-        "family_support_score": rng.integers(1, 11, n),
-        "academic_performance": rng.choice(["Poor", "Average", "Good", "Excellent"], n),
-        "mental_health_risk": rng.choice(["Low", "Medium", "High"], n),
+        "anxiety_level": rng.integers(1, 11, n),
+        "addiction_level": rng.integers(1, 11, n),
+        "depression_label": labels,
     }
     return pd.DataFrame(data)
 
@@ -69,10 +74,10 @@ class TestFitTransform:
         assert not np.isnan(X_test).any(), "X_test에 결측치가 있습니다"
 
     def test_target_encoding(self):
-        """타겟 변수가 0, 1, 2 정수로 인코딩되어야 합니다."""
+        """타겟 변수가 0 또는 1 정수여야 합니다 (이진 분류)."""
         _, _, y_train, y_test = self.preprocessor.fit_transform(self.df)
         all_labels = np.concatenate([y_train, y_test])
-        assert set(np.unique(all_labels)).issubset({0, 1, 2}), \
+        assert set(np.unique(all_labels)).issubset({0, 1}), \
             f"예상치 못한 타겟 값: {np.unique(all_labels)}"
 
     def test_scaling_applied(self):
@@ -95,12 +100,12 @@ class TestTransform:
     def test_single_sample_transform(self):
         """단일 샘플 변환이 정상 작동해야 합니다."""
         sample = pd.DataFrame([{
-            "age": 16, "gender": "Male",
-            "social_media_hours": 4.0, "sleep_hours": 7.0,
-            "physical_activity_hours": 3.0, "depression_score": 5,
-            "anxiety_score": 5, "stress_level": 5,
-            "self_esteem_score": 6, "online_support_access": 1,
-            "family_support_score": 7, "academic_performance": "Average",
+            "age": 16, "gender": "male",
+            "daily_social_media_hours": 4.0, "platform_usage": "Instagram",
+            "sleep_hours": 7.0, "screen_time_before_sleep": 1.0,
+            "academic_performance": 6.0, "physical_activity": 3.0,
+            "social_interaction_level": "medium",
+            "stress_level": 5, "anxiety_level": 5, "addiction_level": 4,
         }])
         result = self.preprocessor.transform(sample)
         assert result.shape[0] == 1, "출력 행 수가 1이어야 합니다"
@@ -109,12 +114,12 @@ class TestTransform:
     def test_unknown_category_handled(self):
         """알 수 없는 범주형 값도 오류 없이 처리되어야 합니다."""
         sample = pd.DataFrame([{
-            "age": 15, "gender": "Unknown",  # 학습 시 본 적 없는 값
-            "social_media_hours": 3.0, "sleep_hours": 8.0,
-            "physical_activity_hours": 2.0, "depression_score": 4,
-            "anxiety_score": 3, "stress_level": 4,
-            "self_esteem_score": 7, "online_support_access": 0,
-            "family_support_score": 6, "academic_performance": "Average",
+            "age": 15, "gender": "unknown_gender",  # 학습 시 본 적 없는 값
+            "daily_social_media_hours": 3.0, "platform_usage": "YouTube",
+            "sleep_hours": 8.0, "screen_time_before_sleep": 0.5,
+            "academic_performance": 7.0, "physical_activity": 2.0,
+            "social_interaction_level": "very_high",
+            "stress_level": 4, "anxiety_level": 3, "addiction_level": 2,
         }])
         try:
             result = self.preprocessor.transform(sample)

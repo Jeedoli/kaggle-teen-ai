@@ -22,7 +22,8 @@ try:
 except Exception:
     pass
 
-RISK_COLORS = {"Low": "#2ecc71", "Medium": "#f39c12", "High": "#e74c3c"}
+RISK_COLORS = {0: "#2ecc71", 1: "#e74c3c"}  # 0=정상, 1=우울증위험
+RISK_LABELS = {0: "정상", 1: "우울증 위험"}
 PALETTE = ["#3498db", "#e74c3c", "#2ecc71", "#9b59b6", "#f39c12"]
 
 
@@ -33,15 +34,15 @@ PALETTE = ["#3498db", "#e74c3c", "#2ecc71", "#9b59b6", "#f39c12"]
 def plot_class_distribution(y: pd.Series | np.ndarray, class_names: list[str] = None) -> go.Figure:
     """타겟 클래스 분포 파이 차트"""
     if isinstance(y, np.ndarray):
-        counts = pd.Series(y).value_counts()
+        counts = pd.Series(y).value_counts().sort_index()
     else:
-        counts = y.value_counts()
+        counts = y.value_counts().sort_index()
 
-    labels = class_names or counts.index.tolist()
+    labels = class_names or ["정상", "우울증 위험"]
     fig = px.pie(
         values=counts.values,
-        names=labels,
-        title="정신건강 위험도 분포",
+        names=labels[:len(counts)],
+        title="우울증 위험 여부 분포",
         color_discrete_sequence=list(RISK_COLORS.values()),
         hole=0.4,
     )
@@ -91,20 +92,22 @@ def plot_feature_distributions(df: pd.DataFrame, columns: list[str], figsize: tu
 
 
 def plot_social_media_vs_mental_health(df: pd.DataFrame) -> go.Figure:
-    """소셜미디어 사용시간 vs 우울점수 산점도"""
+    """소셔미디어 사용시간 vs 불안 수준 산점도"""
+    df_plot = df.copy()
+    df_plot["우울증여부"] = df_plot["depression_label"].map(RISK_LABELS)
     fig = px.scatter(
-        df,
-        x="social_media_hours",
-        y="depression_score",
-        color="mental_health_risk",
-        color_discrete_map=RISK_COLORS,
-        size="anxiety_score",
-        hover_data=["age", "sleep_hours", "stress_level"],
-        title="소셜미디어 사용시간 vs 우울 점수",
+        df_plot,
+        x="daily_social_media_hours",
+        y="anxiety_level",
+        color="우울증여부",
+        color_discrete_map={"정상": RISK_COLORS[0], "우울증 위험": RISK_COLORS[1]},
+        size="stress_level",
+        hover_data=["age", "sleep_hours", "addiction_level"],
+        title="소셜미디어 사용시간 vs 불안 수준",
         labels={
-            "social_media_hours": "일일 소셜미디어 사용 시간 (시간)",
-            "depression_score": "우울 점수",
-            "mental_health_risk": "위험도",
+            "daily_social_media_hours": "일일 소셜미디어 사용 시간 (시간)",
+            "anxiety_level": "불안 수준",
+            "우울증여부": "우울증 여부",
         },
         template="plotly_white",
     )
@@ -117,7 +120,7 @@ def plot_social_media_vs_mental_health(df: pd.DataFrame) -> go.Figure:
 
 def plot_model_comparison(results_df: pd.DataFrame) -> go.Figure:
     """ML 모델 성능 비교 바 차트"""
-    metrics = ["Accuracy", "F1 (weighted)", "AUC (OvR)"]
+    metrics = ["Accuracy", "F1 (binary)", "AUC-ROC"]
     fig = go.Figure()
 
     for metric in metrics:
@@ -221,20 +224,19 @@ def plot_radar_chart(user_values: dict, avg_values: dict) -> go.Figure:
 
 
 def plot_risk_gauge(probability: float, risk_label: str) -> go.Figure:
-    """위험도 게이지 차트 (0~1 확률값을 시각적으로 표시)"""
-    color = RISK_COLORS.get(risk_label, "#95a5a6")
+    """우울증 위험 게이지 차트 (0~1 확률값을 시각적으로 표시)"""
+    color = RISK_COLORS.get(1 if risk_label == "우울증 위험" else 0, "#95a5a6")
     fig = go.Figure(go.Indicator(
         mode="gauge+number+delta",
         value=round(probability * 100, 1),
         domain={"x": [0, 1], "y": [0, 1]},
-        title={"text": f"정신건강 위험도: {risk_label}", "font": {"size": 20}},
+        title={"text": f"우울증 위험도: {risk_label}", "font": {"size": 20}},
         gauge={
             "axis": {"range": [0, 100], "tickwidth": 1},
             "bar": {"color": color},
             "steps": [
-                {"range": [0, 33], "color": "#d5f5e3"},
-                {"range": [33, 66], "color": "#fef9e7"},
-                {"range": [66, 100], "color": "#fadbd8"},
+                {"range": [0, 50], "color": "#d5f5e3"},
+                {"range": [50, 100], "color": "#fadbd8"},
             ],
             "threshold": {
                 "line": {"color": "black", "width": 4},

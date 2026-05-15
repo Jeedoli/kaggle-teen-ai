@@ -1,13 +1,14 @@
 Dataset Summary: Social Media Impact on Teen Mental Health
-Source: Kaggle Dataset - algozee/teenager-menthal-healy (Apache 2.0 License)
+Source: Kaggle Dataset - Teen Mental Health Dataset (Apache 2.0 License)
 
 SECTION 1: DATASET OVERVIEW
-This dataset examines the relationship between social media usage and mental health outcomes in teenagers. It provides a comprehensive view of how digital habits correlate with psychological wellbeing.
+This dataset examines the relationship between social media usage and mental health outcomes in teenagers. It provides a comprehensive view of how digital habits correlate with depression risk.
 
 Dataset specifications:
-- Total records: Approximately 700+ samples
-- Features: 13 columns (10 numeric, 2 categorical, 1 target)
-- Target variable: mental_health_risk (Low / Medium / High)
+- Total records: 1,200 samples
+- Features: 13 columns (9 numeric, 3 categorical, 1 binary target)
+- Target variable: depression_label (0=No Depression / 1=Depression Risk)
+- Class distribution: 0 (Normal)=1169 (97.4%), 1 (Risk)=31 (2.6%) — SEVERE IMBALANCE
 - License: Apache 2.0 (free for academic and commercial use)
 - Kaggle Usability Score: 10.0/10.0
 
@@ -18,79 +19,83 @@ age (numeric):
 - Typical range: 13-19 years
 - Importance: Brain development differs significantly across adolescence
 
-gender (categorical: Male/Female/Other):
+gender (categorical: male/female):
 - Gender identity of the respondent
 - Research shows gender differences in social media impact
 
-social_media_hours (numeric):
+daily_social_media_hours (numeric):
 - Average daily hours spent on social media platforms
 - Key predictor variable
-- Values > 4 hours associated with elevated mental health risk
+- Values > 4 hours associated with elevated depression risk
+
+platform_usage (categorical: Instagram/TikTok/Both):
+- Primary social media platform used
+- Different platforms may have different mental health impacts
 
 sleep_hours (numeric):
 - Average nightly sleep duration in hours
 - Recommended: 8-10 hours for adolescents
 - Strong predictor of mental health outcomes
 
-physical_activity_hours (numeric):
+screen_time_before_sleep (numeric):
+- Hours of screen use within 1 hour before sleep
+- Disrupts circadian rhythm and sleep quality
+
+academic_performance (numeric, 1-10 scale):
+- Self-reported academic performance score
+- Links stress, mental health, and daily routine
+
+physical_activity (numeric, hours/week):
 - Weekly hours of physical activity
 - Includes sports, gym, walking, etc.
 - Protective factor for mental health
 
-depression_score (numeric, 1-10 scale):
-- Self-reported depression severity
-- Higher score indicates more severe depression symptoms
-
-anxiety_score (numeric, 1-10 scale):
-- Self-reported anxiety level
-- Higher score indicates more severe anxiety symptoms
+social_interaction_level (categorical: low/medium/high):
+- Level of offline social interaction with peers
+- Protective factor: higher interaction associated with better mental health
 
 stress_level (numeric, 1-10 scale):
 - Perceived stress level from academic, social, and family sources
+- Higher score indicates more stress
 
-self_esteem_score (numeric, 1-10 scale):
-- Measures self-worth and confidence
-- Protective factor: higher scores associated with better mental health
+anxiety_level (numeric, 1-10 scale):
+- Self-reported anxiety level
+- Higher score indicates more severe anxiety symptoms
 
-academic_performance (categorical: Poor/Average/Good/Excellent):
-- Self-reported school performance
-- Links stress, mental health, and daily routine
+addiction_level (numeric, 1-10 scale):
+- Self-reported social media addiction severity
+- Key behavioral predictor
 
-online_support_access (binary: 0/1):
-- Whether the adolescent has access to online mental health resources
-
-family_support_score (numeric, 1-10 scale):
-- Perceived family support level
-- One of the strongest protective factors in the dataset
-
-mental_health_risk (target - Low/Medium/High):
-- 3-class classification target
-- Based on combination of psychological scores and behavioral patterns
+depression_label (target - binary: 0/1):
+- Binary classification target
+- 0: No depression risk
+- 1: Depression risk detected
 
 SECTION 3: KEY DATASET STATISTICS
 Observed correlations:
-- social_media_hours ↔ depression_score: Strong positive correlation
-- sleep_hours ↔ anxiety_score: Moderate negative correlation
-- physical_activity_hours ↔ stress_level: Moderate negative correlation
-- family_support_score ↔ mental_health_risk: Strong negative correlation (high support = lower risk)
+- daily_social_media_hours ↔ depression_label: Positive correlation
+- sleep_hours ↔ anxiety_level: Moderate negative correlation
+- physical_activity ↔ stress_level: Moderate negative correlation
+- addiction_level ↔ depression_label: Strong positive correlation
 
-Class distribution (approximate):
-- Low risk: ~33%
-- Medium risk: ~40%
-- High risk: ~27%
+Class distribution (actual):
+- Normal (0): 1169 samples (97.4%)
+- Depression Risk (1): 31 samples (2.6%)
+- NOTE: Severe class imbalance — class_weight='balanced' required for all ML models
 
 SECTION 4: ANALYSIS INSIGHTS
-Top predictors of high mental health risk (based on feature importance):
-1. depression_score (strongest predictor)
-2. anxiety_score
-3. social_media_hours (key behavioral predictor)
-4. sleep_hours (sleep hygiene critical)
-5. family_support_score (protective factor)
-6. stress_level
-7. self_esteem_score
+Top predictors of depression risk (based on feature importance):
+1. anxiety_level (strongest predictor)
+2. stress_level
+3. addiction_level (key behavioral predictor)
+4. daily_social_media_hours
+5. sleep_hours (sleep hygiene critical)
+6. screen_time_before_sleep
+7. social_interaction_level (protective factor)
 
 Actionable interventions suggested by data:
-- Reducing social media to under 2 hours/day has the strongest modifiable impact
-- Improving sleep from 6 to 8 hours shows significant risk reduction
-- Increasing weekly exercise by 3+ hours correlates with lower anxiety scores
-- Family support interventions show outsized impact on risk reduction
+- Reducing social media addiction level is the most impactful modifiable factor
+- Reducing daily social media to under 2 hours/day shows significant risk reduction
+- Improving sleep quality (less screen time before sleep) correlates with lower anxiety
+- Increasing offline social interactions is a strong protective factor
+- Regular physical activity (3+ hours/week) reduces both stress and anxiety

@@ -62,7 +62,7 @@ class DLClassifier:
     PyTorch 신경망 학습 / 평가 / 저장을 관리하는 래퍼 클래스
 
     사용 예시:
-        clf = DLClassifier(input_dim=12, output_dim=3)
+        clf = DLClassifier(input_dim=12, output_dim=2, pos_weight=37.0)
         history = clf.fit(X_train, y_train, X_val=X_test, y_val=y_test)
         clf.save("models/saved/best_dl_model.pt")
     """
@@ -70,13 +70,14 @@ class DLClassifier:
     def __init__(
         self,
         input_dim: int,
-        output_dim: int = 3,
+        output_dim: int = 2,
         hidden_dims: list[int] = None,
         dropout_rate: float = 0.3,
         learning_rate: float = 1e-3,
         batch_size: int = 64,
         epochs: int = 100,
         patience: int = 15,
+        pos_weight: float = 37.0,  # 1169/31 ≈ 37 (양성 클래스 가중치)
         device: str = None,
     ):
         self.input_dim = input_dim
@@ -86,7 +87,8 @@ class DLClassifier:
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.epochs = epochs
-        self.patience = patience  # Early Stopping 기준
+        self.patience = patience
+        self.pos_weight = pos_weight  # Early Stopping 기준
 
         # GPU가 있으면 GPU 사용, 없으면 CPU
         self.device = torch.device(
@@ -132,7 +134,9 @@ class DLClassifier:
         self._build_model()
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        criterion = nn.CrossEntropyLoss()
+        # 클래스 가중치: 양성(1) 클래스를 pos_weight 배율로 강조
+        weight_tensor = torch.FloatTensor([1.0, self.pos_weight]).to(self.device)
+        criterion = nn.CrossEntropyLoss(weight=weight_tensor)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer, mode="min", patience=5, factor=0.5
         )
@@ -241,13 +245,18 @@ class DLClassifier:
 
     def evaluate(self, X_test: np.ndarray, y_test: np.ndarray) -> dict:
         """테스트 데이터 성능 평가."""
-        from sklearn.metrics import accuracy_score, f1_score
+        from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
         y_pred = self.predict(X_test)
+        y_prob = self.predict_proba(X_test)[:, 1]
         acc = accuracy_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred, average="weighted")
-        print(f"\n[DL 테스트 성능] Accuracy: {acc:.4f} | F1: {f1:.4f}")
-        return {"accuracy": acc, "f1_weighted": f1}
+        f1 = f1_score(y_test, y_pred, average="binary", zero_division=0)
+        try:
+            auc = roc_auc_score(y_test, y_prob)
+        except Exception:
+            auc = float("nan")
+        print(f"\n[DL 테스트 성능] Accuracy: {acc:.4f} | F1: {f1:.4f} | AUC-ROC: {auc:.4f}")
+        return {"accuracy": acc, "f1_binary": f1, "auc_roc": auc}
 
     # ─────────────────────────────────────────
     # 저장 / 불러오기
@@ -262,6 +271,7 @@ class DLClassifier:
                 "output_dim": self.output_dim,
                 "hidden_dims": self.hidden_dims,
                 "dropout_rate": self.dropout_rate,
+                "pos_weight": self.pos_weight,
             },
             "history": self.history,
         }, path)

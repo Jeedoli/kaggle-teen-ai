@@ -19,25 +19,20 @@ MODEL_PATH = PROJECT_ROOT / "models" / "saved"
 PREPROCESSOR_PATH = MODEL_PATH / "preprocessor.pkl"
 ML_MODEL_PATH = MODEL_PATH / "best_ml_model.pkl"
 
-RISK_LABELS = ["Low", "Medium", "High"]
-RISK_KO = {"Low": "낮음 🟢", "Medium": "보통 🟡", "High": "높음 🔴"}
+RISK_LABELS = ["정상", "우울증 위험"]
+RISK_KO = {"정상": "정상 🟢", "우울증 위험": "우울증 위험 🔴"}
 
 IMPROVEMENT_TIPS = {
-    "Low": [
+    "정상": [
         "✅ 현재 건강한 생활 습관을 잘 유지하고 있어요!",
         "💪 지금처럼 규칙적인 수면과 운동을 계속 유지하세요.",
         "📱 소셜미디어 사용 시간을 지금 수준으로 유지하면 좋아요.",
+        "😊 친구, 가족과 오프라인 교류를 꾸준히 이어가세요.",
     ],
-    "Medium": [
-        "⚠️ 몇 가지 생활 습관을 조금씩 개선하면 더 건강해질 수 있어요.",
-        "😴 수면 시간을 하루 8시간 이상으로 늘려보세요.",
-        "📵 저녁 10시 이후에는 소셜미디어 앱 알림을 꺼두세요.",
-        "🚶 매일 30분 이상 가볍게 걷는 습관을 만들어보세요.",
-    ],
-    "High": [
-        "🚨 정신건강에 주의가 필요한 상태입니다. 아래 조언을 참고하세요.",
+    "우울증 위험": [
+        "🚨 우울증 위험 신호가 감지되었습니다. 아래 조언을 참고하세요.",
         "📵 소셜미디어 사용 시간을 하루 1~2시간으로 줄여보세요.",
-        "🛌 취침 1시간 전 스크린 사용을 완전히 중단하세요.",
+        "🛌 취침 1시간 전 스크린 사용을 중단하고 충분한 수면(8시간 이상)을 취하세요.",
         "🏃 주 3회 이상 규칙적인 운동이 스트레스와 불안을 크게 줄여줍니다.",
         "👨‍👩‍👧 가족이나 친한 친구와 오프라인 대화를 늘려보세요.",
         "🩺 증상이 2주 이상 지속된다면 전문 상담사나 의사를 찾아가세요.",
@@ -132,31 +127,31 @@ def _run_prediction(preprocessor, ml_model, input_data: dict):
     """입력 데이터로 예측을 실행하고 결과를 표시합니다."""
     input_df = pd.DataFrame([input_data])
     X = preprocessor.transform(input_df)
-    proba = ml_model.predict_proba(X)[0]
-    pred_idx = np.argmax(proba)
-    pred_label = RISK_LABELS[pred_idx]
-    confidence = proba[pred_idx]
+    proba = ml_model.predict_proba(X)[0]  # [p_normal, p_depression]
+    pred_idx = int(np.argmax(proba))
+    pred_label = RISK_LABELS[pred_idx]   # "정상" or "우울증 위험"
+    confidence = float(proba[pred_idx])
 
     st.subheader("📊 분석 결과")
 
-    # 게이지 차트
-    gauge_fig = plot_risk_gauge(confidence, pred_label)
+    # 게이지 차트: 우울증 위험 확률(proba[1]) 표시
+    gauge_fig = plot_risk_gauge(float(proba[1]), pred_label)
     st.plotly_chart(gauge_fig, use_container_width=True)
 
-    # 위험도 확률 바
-    st.markdown("**클래스별 확률**")
+    # 클래스별 확률 바
+    st.markdown("**예측 확률**")
     for i, label in enumerate(RISK_LABELS):
         st.progress(float(proba[i]), text=f"{label}: {proba[i]*100:.1f}%")
 
-    # 레이더 차트 (나 vs 데이터셋 평균)
+    # 레이더 차트 (나 vs 평균)
     user_radar = {
-        "소셜미디어": min(input_data["social_media_hours"] / 12 * 10, 10),
+        "소셔미디어": min(input_data["daily_social_media_hours"] / 12 * 10, 10),
         "수면": input_data["sleep_hours"] / 10 * 10,
-        "운동": min(input_data["physical_activity_hours"] / 21 * 10, 10),
-        "가족지지": input_data["family_support_score"],
-        "자존감": input_data["self_esteem_score"],
+        "운동": min(input_data["physical_activity"] / 21 * 10, 10),
+        "불안": input_data["anxiety_level"],
+        "스트레스": input_data["stress_level"],
     }
-    avg_radar = {"소셜미디어": 3.0, "수면": 7.0, "운동": 4.0, "가족지지": 6.5, "자존감": 6.0}
+    avg_radar = {"소셜미디어": 3.5, "수면": 7.0, "운동": 4.0, "불안": 3.8, "스트레스": 4.5}
     radar_fig = plot_radar_chart(user_radar, avg_radar)
     st.plotly_chart(radar_fig, use_container_width=True)
 
@@ -170,5 +165,5 @@ def _show_demo_mode():
     """모델 미학습 시 데모 UI만 표시"""
     st.subheader("🎮 데모 미리보기")
     st.markdown("모델 학습 완료 후 이런 화면이 나타납니다.")
-    sample_fig = plot_risk_gauge(0.65, "Medium")
+    sample_fig = plot_risk_gauge(0.65, "우울증 위험")
     st.plotly_chart(sample_fig, use_container_width=True)

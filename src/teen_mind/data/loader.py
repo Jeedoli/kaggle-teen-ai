@@ -15,42 +15,44 @@ RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 PROCESSED_DATA_DIR = PROJECT_ROOT / "data" / "processed"
 KNOWLEDGE_BASE_DIR = PROJECT_ROOT / "data" / "knowledge_base"
 
-# 데이터셋 컬럼 정의 (13개)
+# 데이터셋 컬럼 정의 (13개) — Teen_Mental_Health_Dataset.csv 기준
 COLUMN_NAMES = [
     "age",
     "gender",
-    "social_media_hours",
+    "daily_social_media_hours",
+    "platform_usage",
     "sleep_hours",
-    "physical_activity_days",
-    "stress_level",
-    "anxiety_score",
-    "depression_score",
-    "screen_time_hours",
-    "number_of_platforms",
-    "online_interaction_frequency",
+    "screen_time_before_sleep",
     "academic_performance",
-    "mental_health_risk",
+    "physical_activity",
+    "social_interaction_level",
+    "stress_level",
+    "anxiety_level",
+    "addiction_level",
+    "depression_label",
 ]
 
-# 타겟 컬럼
-TARGET_COLUMN = "mental_health_risk"
+# 타겟 컬럼 (0=우울증 없음, 1=우울증 위험)
+TARGET_COLUMN = "depression_label"
+
+# 타겟 클래스 레이블
+CLASS_LABELS = {0: "우울증 없음", 1: "우울증 위험"}
 
 # 수치형 컬럼 (스케일링 대상)
 NUMERIC_COLUMNS = [
     "age",
-    "social_media_hours",
+    "daily_social_media_hours",
     "sleep_hours",
-    "physical_activity_days",
+    "screen_time_before_sleep",
+    "academic_performance",
+    "physical_activity",
     "stress_level",
-    "anxiety_score",
-    "depression_score",
-    "screen_time_hours",
-    "number_of_platforms",
-    "online_interaction_frequency",
+    "anxiety_level",
+    "addiction_level",
 ]
 
 # 범주형 컬럼 (인코딩 대상)
-CATEGORICAL_COLUMNS = ["gender", "academic_performance"]
+CATEGORICAL_COLUMNS = ["gender", "platform_usage", "social_interaction_level"]
 
 
 def load_raw_data(filename: str = "Teen_Mental_Health_Dataset.csv") -> pd.DataFrame:

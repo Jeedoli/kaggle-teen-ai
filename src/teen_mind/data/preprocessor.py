@@ -44,8 +44,8 @@ class MentalHealthPreprocessor:
         # 각 단계별 변환기 (교체 가능하도록 분리)
         self.scaler = StandardScaler() if scaler_type == "standard" else MinMaxScaler()
         self.label_encoders: dict[str, LabelEncoder] = {}
-        self.target_encoder = LabelEncoder()
         self.is_fitted = False
+        self.class_weights: np.ndarray | None = None  # 클래스 불균형 가중치
 
     # ─────────────────────────────────────────
     # Step 1: 결측치 처리
@@ -115,7 +115,12 @@ class MentalHealthPreprocessor:
                 self.label_encoders[col] = le
             else:
                 le = self.label_encoders[col]
-                df[col] = le.transform(df[col].astype(str))
+                # 학습 시 보지 못한 범주는 최빈값으로 대체
+                known = set(le.classes_)
+                df[col] = df[col].astype(str).apply(
+                    lambda x: x if x in known else le.classes_[0]
+                )
+                df[col] = le.transform(df[col])
         return df
 
     # ─────────────────────────────────────────
@@ -149,8 +154,8 @@ class MentalHealthPreprocessor:
         """
         print("\n[전처리 시작]")
 
-        # 타겟 인코딩
-        y = self.target_encoder.fit_transform(df[TARGET_COLUMN].astype(str))
+        # 타겟 컬럼 (이미 0/1 정수 — 별도 인코딩 불필요)
+        y = df[TARGET_COLUMN].astype(int).values
         X = df.drop(columns=[TARGET_COLUMN])
 
         # 파이프라인 순서대로 실행
@@ -170,10 +175,18 @@ class MentalHealthPreprocessor:
         self.feature_names = X.columns.tolist()
         self.is_fitted = True
 
+        # 클래스 불균형 가중치 계산 (1169:31 극심한 불균형 대응)
+        from sklearn.utils.class_weight import compute_class_weight
+        classes = np.unique(y_train)
+        weights = compute_class_weight("balanced", classes=classes, y=y_train)
+        self.class_weights = weights
+
+        neg, pos = np.bincount(y_train)
         print(f"\n[전처리 완료]")
         print(f"  학습 데이터: {X_train.shape[0]}행 × {X_train.shape[1]}열")
         print(f"  테스트 데이터: {X_test.shape[0]}행 × {X_test.shape[1]}열")
-        print(f"  클래스 레이블: {list(self.target_encoder.classes_)}")
+        print(f"  클래스 분포 (학습): 정상={neg}, 우울증위험={pos}")
+        print(f"  클래스 가중치: {dict(zip(classes.tolist(), weights.round(2).tolist()))}")
 
         return X_train, X_test, y_train, y_test
 
