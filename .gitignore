@@ -19,21 +19,23 @@ build/
 venv/
 env/
 .env
-.env.*
+.env.local
+.env.production
+# .env.example 은 추적함 (실제 값 없는 예시 파일)
 
 # =============================================
 # 데이터 파일 (원시 데이터 & 전처리 결과)
 # 용량이 크거나 개인정보가 포함될 수 있어 Git에 올리지 않음
 # =============================================
-data/raw/
-data/processed/
+data/raw/*
+data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
 # =============================================
 # 학습된 모델 파일 (용량이 크므로 Git 제외)
 # =============================================
-models/saved/
+models/saved/*
 !models/saved/.gitkeep
 *.pkl
 *.pt
