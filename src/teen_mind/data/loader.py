@@ -10,7 +10,8 @@ import pandas as pd
 
 
 # 프로젝트 루트 기준으로 경로를 잡습니다.
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
+# loader.py 위치: src/teen_mind/data/loader.py → parents[3] = 프로젝트 루트
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 PROCESSED_DATA_DIR = PROJECT_ROOT / "data" / "processed"
 KNOWLEDGE_BASE_DIR = PROJECT_ROOT / "data" / "knowledge_base"
